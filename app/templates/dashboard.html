@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Cold Chain Tracker{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Dashboard</h3>
+  <small class="text-muted">Database session: <code>{{ db_user }}</code></small>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card border-primary h-100"><div class="card-body">
+      <div class="text-muted small">Shipments in transit</div>
+      <div class="display-6">{{ stats.in_transit }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-danger h-100"><div class="card-body">
+      <div class="text-muted small">Open alerts</div>
+      <div class="display-6">{{ stats.open_alerts }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-warning h-100"><div class="card-body">
+      <div class="text-muted small">Batches expiring (60 days)</div>
+      <div class="display-6">{{ stats.expiring }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card border-secondary h-100"><div class="card-body">
+      <div class="text-muted small">Quarantined stock lines</div>
+      <div class="display-6">{{ stats.quarantined }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Latest alerts</div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Location</th><th>Started</th><th>Minutes</th><th>Peak &deg;C</th><th>Severity</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr>
+          <td>{{ a.alert_id }}</td>
+          <td>{{ a.location }}</td>
+          <td>{{ a.start_time }}</td>
+          <td>{{ a.duration_min }}</td>
+          <td>{{ a.peak_temp }}</td>
+          <td>
+            <span class="badge
+              {% if a.severity == 'Critical' %}bg-danger
+              {% elif a.severity == 'High' %}bg-warning text-dark
+              {% elif a.severity == 'Medium' %}bg-info text-dark
+              {% else %}bg-secondary{% endif %}">{{ a.severity }}</span>
+          </td>
+          <td>{{ a.status }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-3">No open alerts</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -18,10 +18,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- Users (demo passwords are stored as SHA-256 hashes)
 INSERT INTO user_account (username, password_hash, full_name, email, role) VALUES
-('admin',    SHA2('admin123',256),   'Jignesh Admin',  'admin@coldchain.in',    'Admin'),
-('manager1', SHA2('manager123',256), 'Amit Sharma',    'amit@coldchain.in',     'Warehouse Manager'),
-('auditor1', SHA2('auditor123',256), 'Priya Nair',     'priya@coldchain.in',    'Quality Auditor'),
-('manager2', SHA2('manager123',256), 'Rohan Joshi',    'rohan@coldchain.in',    'Warehouse Manager');
+('admin',    SHA2('admin123',256),   'Meera Kulkarni',  'admin@coldchain.in',    'Admin'),
+('manager1', SHA2('manager123',256), 'Karan Verma',    'karan@coldchain.in',     'Warehouse Manager'),
+('auditor1', SHA2('auditor123',256), 'Neha Iyer',     'neha@coldchain.in',    'Quality Auditor'),
+('manager2', SHA2('manager123',256), 'Vikram Rao',    'vikram@coldchain.in',    'Warehouse Manager');
 
 -- Facilities (parent first, so the hierarchy is valid)
 INSERT INTO facility (facility_name, facility_type, parent_facility_id, city, state) VALUES
@@ -85,12 +85,12 @@ INSERT INTO inventory (unit_id, batch_id, quantity) VALUES
 
 -- Shipments (times are relative to now)
 INSERT INTO shipment (source_facility_id, destination_facility_id, created_by, vehicle_reg_no, driver_name, sensor_id, dispatch_time, eta, actual_arrival, status) VALUES
-(2, 3, 2, 'MH-01-AB-1234', 'Ramesh Patil', 'TRK-001', DATE_SUB(NOW(), INTERVAL 150 HOUR), DATE_SUB(NOW(), INTERVAL 139 HOUR), DATE_SUB(NOW(), INTERVAL 138 HOUR), 'Delivered'),
-(3, 4, 2, 'GJ-05-XY-4321', 'Suresh Desai', 'TRK-002', DATE_SUB(NOW(), INTERVAL 100 HOUR), DATE_SUB(NOW(), INTERVAL 94 HOUR),  DATE_SUB(NOW(), INTERVAL 93 HOUR),  'Delivered'),
-(4, 6, 4, 'GJ-05-CD-7788', 'Mahesh Shah',  'TRK-003', DATE_SUB(NOW(), INTERVAL 60 HOUR),  DATE_SUB(NOW(), INTERVAL 57 HOUR),  DATE_SUB(NOW(), INTERVAL 58 HOUR),  'Delivered'),
-(3, 5, 4, 'GJ-01-EF-9900', 'Kiran Mehta',  'TRK-004', DATE_SUB(NOW(), INTERVAL 40 HOUR),  DATE_SUB(NOW(), INTERVAL 35 HOUR),  DATE_SUB(NOW(), INTERVAL 36 HOUR),  'Delivered'),
-(4, 7, 2, 'GJ-05-CD-7788', 'Mahesh Shah',  'TRK-005', DATE_SUB(NOW(), INTERVAL 3 HOUR),   DATE_ADD(NOW(), INTERVAL 1 HOUR),   NULL,                               'In Transit'),
-(2, 4, 2, 'MH-01-AB-1234', 'Ramesh Patil', 'TRK-006', NULL,                               NULL,                               NULL,                               'Created');
+(2, 3, 2, 'MH-01-AB-1234', 'Dinesh Kale', 'TRK-001', DATE_SUB(NOW(), INTERVAL 150 HOUR), DATE_SUB(NOW(), INTERVAL 139 HOUR), DATE_SUB(NOW(), INTERVAL 138 HOUR), 'Delivered'),
+(3, 4, 2, 'GJ-05-XY-4321', 'Ajay Pillai', 'TRK-002', DATE_SUB(NOW(), INTERVAL 100 HOUR), DATE_SUB(NOW(), INTERVAL 94 HOUR),  DATE_SUB(NOW(), INTERVAL 93 HOUR),  'Delivered'),
+(4, 6, 4, 'GJ-05-CD-7788', 'Sanjay Bhatt',  'TRK-003', DATE_SUB(NOW(), INTERVAL 60 HOUR),  DATE_SUB(NOW(), INTERVAL 57 HOUR),  DATE_SUB(NOW(), INTERVAL 58 HOUR),  'Delivered'),
+(3, 5, 4, 'GJ-01-EF-9900', 'Manoj Yadav',  'TRK-004', DATE_SUB(NOW(), INTERVAL 40 HOUR),  DATE_SUB(NOW(), INTERVAL 35 HOUR),  DATE_SUB(NOW(), INTERVAL 36 HOUR),  'Delivered'),
+(4, 7, 2, 'GJ-05-CD-7788', 'Sanjay Bhatt',  'TRK-005', DATE_SUB(NOW(), INTERVAL 3 HOUR),   DATE_ADD(NOW(), INTERVAL 1 HOUR),   NULL,                               'In Transit'),
+(2, 4, 2, 'MH-01-AB-1234', 'Dinesh Kale', 'TRK-006', NULL,                               NULL,                               NULL,                               'Created');
 
 -- Shipment items (shipment_id, batch_id, source_unit_id, quantity)
 INSERT INTO shipment_item (shipment_id, batch_id, source_unit_id, quantity) VALUES
