@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Inventory - Cold Chain Tracker{% endblock %}
+{% block content %}
+<h3 class="mb-3">Inventory</h3>
+
+{% if can_add %}
+<div class="card mb-4">
+  <div class="card-header">Receive stock into a storage unit</div>
+  <div class="card-body">
+    <form method="post" action="/inventory/add" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Storage unit</label>
+        <select name="unit_id" class="form-select" required>
+          {% for u in units %}<option value="{{ u.unit_id }}">{{ u.label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Batch (active, not expired)</label>
+        <select name="batch_id" class="form-select" required>
+          {% for b in batches %}<option value="{{ b.batch_id }}">{{ b.label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Quantity</label>
+        <input type="number" name="quantity" min="1" class="form-control" required>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Add stock</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead>
+        <tr><th>Facility</th><th>Unit</th><th>Product</th><th>Batch</th><th>Expires</th><th>Quantity</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.facility_name }}</td>
+          <td>{{ r.unit_name }}</td>
+          <td>{{ r.product_name }}</td>
+          <td>{{ r.batch_no }}</td>
+          <td>{{ r.expiry_date }}</td>
+          <td>{{ r.quantity }}</td>
+          <td>
+            <span class="badge {% if r.stock_status == 'Quarantined' %}bg-danger{% else %}bg-success{% endif %}">{{ r.stock_status }}</span>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-3">No stock</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

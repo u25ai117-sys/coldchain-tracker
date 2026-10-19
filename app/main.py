@@ -100,7 +100,8 @@ def dashboard(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={"user": user, "stats": stats, "alerts": alerts, "db_user": db_user},
+        context={"user": user, "stats": stats, "alerts": alerts, "db_user": db_user,
+                 "flash": request.session.pop("flash", None)},
     )
 
 
@@ -108,3 +109,8 @@ def dashboard(request: Request):
 def health():
     row = query_one("SELECT 1 AS ok")
     return {"status": "ok", "database": "connected" if row else "error"}
+
+
+from app.crud import router as crud_router  # noqa: E402
+
+app.include_router(crud_router)

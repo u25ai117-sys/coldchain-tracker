@@ -44,3 +44,16 @@ def query_all(sql, params=None, role=None):
 def query_one(sql, params=None, role=None):
     rows = query_all(sql, params, role)
     return rows[0] if rows else None
+
+
+def execute(sql, params=None, role=None):
+    conn = get_connection(role)
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, params or ())
+        conn.commit()
+        last_id = cur.lastrowid
+        cur.close()
+        return last_id
+    finally:
+        conn.close()

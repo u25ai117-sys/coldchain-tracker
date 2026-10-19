@@ -13,16 +13,16 @@
       <a class="navbar-brand" href="/dashboard">Cold Chain Tracker</a>
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="/facilities">Facilities</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="/batches">Batches</a></li>
+        <li class="nav-item"><a class="nav-link" href="/inventory">Inventory</a></li>
         {% if user.role in ['Admin', 'Warehouse Manager'] %}
         <li class="nav-item"><a class="nav-link disabled">Shipments</a></li>
-        <li class="nav-item"><a class="nav-link disabled">Inventory</a></li>
         {% endif %}
         {% if user.role in ['Admin', 'Quality Auditor'] %}
         <li class="nav-item"><a class="nav-link disabled">Alerts</a></li>
         <li class="nav-item"><a class="nav-link disabled">Reports</a></li>
-        {% endif %}
-        {% if user.role == 'Admin' %}
-        <li class="nav-item"><a class="nav-link disabled">Users</a></li>
         {% endif %}
       </ul>
       <span class="navbar-text me-3">{{ user.full_name }} <span class="badge bg-light text-primary">{{ user.role }}</span></span>
@@ -31,6 +31,10 @@
   </nav>
   {% endif %}
   <div class="container py-4">
+    {% set msg = flash if flash is defined and flash else request.session.pop('flash', None) %}
+    {% if msg %}
+    <div class="alert alert-{{ msg.kind }}">{{ msg.message }}</div>
+    {% endif %}
     {% block content %}{% endblock %}
   </div>
 </body>
