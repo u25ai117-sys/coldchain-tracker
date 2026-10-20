@@ -114,3 +114,9 @@ def health():
 from app.crud import router as crud_router  # noqa: E402
 
 app.include_router(crud_router)
+
+from app.shipments import router as shipments_router  # noqa: E402
+from app.alerts import router as alerts_router  # noqa: E402
+
+app.include_router(shipments_router)
+app.include_router(alerts_router)

@@ -18,10 +18,10 @@
         <li class="nav-item"><a class="nav-link" href="/batches">Batches</a></li>
         <li class="nav-item"><a class="nav-link" href="/inventory">Inventory</a></li>
         {% if user.role in ['Admin', 'Warehouse Manager'] %}
-        <li class="nav-item"><a class="nav-link disabled">Shipments</a></li>
+        <li class="nav-item"><a class="nav-link" href="/shipments">Shipments</a></li>
         {% endif %}
         {% if user.role in ['Admin', 'Quality Auditor'] %}
-        <li class="nav-item"><a class="nav-link disabled">Alerts</a></li>
+        <li class="nav-item"><a class="nav-link" href="/alerts">Alerts</a></li>
         <li class="nav-item"><a class="nav-link disabled">Reports</a></li>
         {% endif %}
       </ul>

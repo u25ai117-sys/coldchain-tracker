@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}New shipment - Cold Chain Tracker{% endblock %}
+{% block content %}
+<h3 class="mb-1">New shipment</h3>
+<p class="text-muted">Choose a product and a quantity. The database picks the batches by FEFO
+(earliest expiry first) and skips expired or quarantined stock.</p>
+<form method="post" action="/shipments/new" class="card card-body" style="max-width: 720px;">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">From facility</label>
+      <select name="source" class="form-select" required>
+        {% for f in facilities %}<option value="{{ f.facility_id }}">{{ f.facility_name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">To facility</label>
+      <select name="destination" class="form-select" required>
+        {% for f in facilities %}<option value="{{ f.facility_id }}">{{ f.facility_name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Product</label>
+      <select name="product" class="form-select" required>
+        {% for p in products %}<option value="{{ p.product_id }}">{{ p.product_name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Quantity</label>
+      <input type="number" name="quantity" min="1" class="form-control" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Vehicle registration</label>
+      <input type="text" name="vehicle" class="form-control" placeholder="GJ-05-AB-1234" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Driver</label>
+      <input type="text" name="driver" class="form-control" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Sensor ID</label>
+      <input type="text" name="sensor" class="form-control" placeholder="TRK-010" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Expected transit (hours)</label>
+      <input type="number" name="eta_hours" min="1" value="4" class="form-control" required>
+    </div>
+  </div>
+  <div class="mt-4">
+    <button type="submit" class="btn btn-primary">Create and dispatch</button>
+    <a href="/shipments" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Shipment {{ s.shipment_id }} - Cold Chain Tracker{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Shipment #{{ s.shipment_id }}</h3>
+  <a class="btn btn-outline-secondary btn-sm" href="/shipments">Back to list</a>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card h-100"><div class="card-body">
+      <div><strong>Route:</strong> {{ s.source }} &rarr; {{ s.destination }}</div>
+      <div><strong>Vehicle:</strong> {{ s.vehicle_reg_no }} &middot; <strong>Driver:</strong> {{ s.driver_name }}</div>
+      <div><strong>Sensor:</strong> {{ s.sensor_id }}</div>
+      <div><strong>Created by:</strong> {{ s.created_by_name }}</div>
+      <div><strong>Dispatched:</strong> {{ s.dispatch_time if s.dispatch_time else '-' }}</div>
+      <div><strong>ETA:</strong> {{ s.eta if s.eta else '-' }}</div>
+      <div><strong>Arrived:</strong> {{ s.actual_arrival if s.actual_arrival else '-' }}</div>
+      <div class="mt-2">
+        <span class="badge {% if s.status == 'Delivered' %}bg-success{% elif s.status == 'In Transit' %}bg-primary{% else %}bg-secondary{% endif %}">{{ s.status }}</span>
+        <span class="badge {% if s.temp_status == 'Breached' %}bg-danger{% else %}bg-success{% endif %}">Temperature: {{ s.temp_status }}</span>
+      </div>
+    </div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100"><div class="card-body">
+      <h6>Temperature summary</h6>
+      {% if temps and temps.readings %}
+      <div>Readings: {{ temps.readings }}</div>
+      <div>Lowest: {{ temps.min_t }} &deg;C &middot; Highest: {{ temps.max_t }} &deg;C &middot; Average: {{ temps.avg_t }} &deg;C</div>
+      {% else %}
+      <div class="text-muted">No readings recorded yet.</div>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">Items (picked by FEFO)</div>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Product</th><th>Batch</th><th>Expires</th><th>Taken from</th><th>Quantity</th></tr></thead>
+      <tbody>
+        {% for i in items %}
+        <tr>
+          <td>{{ i.product_name }}</td><td>{{ i.batch_no }}</td><td>{{ i.expiry_date }}</td>
+          <td>{{ i.from_unit }}</td><td>{{ i.quantity }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-3">No items</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if alerts %}
+<div class="card mb-3 border-danger">
+  <div class="card-header text-danger">Temperature alerts</div>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead><tr><th>#</th><th>Started</th><th>Ended</th><th>Peak &deg;C</th><th>Severity</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr>
+          <td>{{ a.alert_id }}</td><td>{{ a.start_time }}</td><td>{{ a.end_time if a.end_time else '' }}</td>
+          <td>{{ a.peak_temp }}</td><td>{{ a.severity }}</td><td>{{ a.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if s.status == 'In Transit' %}
+<div class="card">
+  <div class="card-header">Receive this shipment</div>
+  <div class="card-body">
+    {% if s.temp_status == 'Breached' %}
+    <div class="alert alert-warning py-2">This shipment had a temperature breach, so its stock will arrive <strong>quarantined</strong>.</div>
+    {% endif %}
+    <form method="post" action="/shipments/{{ s.shipment_id }}/receive" class="row g-2 align-items-end">
+      <div class="col-md-6">
+        <label class="form-label">Storage unit at {{ s.destination }}</label>
+        <select name="unit_id" class="form-select" required>
+          {% for u in dest_units %}<option value="{{ u.unit_id }}">{{ u.unit_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-success w-100">Receive into stock</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Alerts - Cold Chain Tracker{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Temperature alerts</h3>
+  <div class="btn-group btn-group-sm">
+    <a class="btn {% if status == 'open' %}btn-primary{% else %}btn-outline-primary{% endif %}" href="/alerts?status=open">Open</a>
+    <a class="btn {% if status == 'resolved' %}btn-primary{% else %}btn-outline-primary{% endif %}" href="/alerts?status=resolved">Resolved</a>
+    <a class="btn {% if status == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}" href="/alerts?status=all">All</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle mb-0">
+      <thead>
+        <tr><th>#</th><th>Location</th><th>Started</th><th>Minutes</th><th>Peak &deg;C</th>
+            <th>Severity</th><th>Status</th><th>Action / outcome</th></tr>
+      </thead>
+      <tbody>
+        {% for a in rows %}
+        <tr>
+          <td>{{ a.alert_id }}</td>
+          <td>{{ a.location }}</td>
+          <td>{{ a.start_time }}</td>
+          <td>{{ a.duration_min }}</td>
+          <td>{{ a.peak_temp }}</td>
+          <td>
+            <span class="badge {% if a.severity == 'Critical' %}bg-danger{% elif a.severity == 'High' %}bg-warning text-dark{% elif a.severity == 'Medium' %}bg-info text-dark{% else %}bg-secondary{% endif %}">{{ a.severity }}</span>
+          </td>
+          <td>
+            <span class="badge {% if a.status == 'Resolved' %}bg-success{% elif a.status == 'Under Review' %}bg-primary{% else %}bg-danger{% endif %}">{{ a.status }}</span>
+          </td>
+          <td>
+            {% if a.status == 'Resolved' %}
+              <small class="text-muted">{{ a.resolution_note }}<br>by {{ a.resolved_by_name }}</small>
+            {% else %}
+              {% if a.status == 'Open' %}
+              <form method="post" action="/alerts/{{ a.alert_id }}/review" class="d-inline">
+                <button class="btn btn-outline-primary btn-sm">Start review</button>
+              </form>
+              {% endif %}
+              <form method="post" action="/alerts/{{ a.alert_id }}/resolve" class="d-flex gap-1 mt-1">
+                <select name="decision" class="form-select form-select-sm" style="width: 110px;" required>
+                  <option value="accept">Accept</option>
+                  <option value="discard">Discard</option>
+                </select>
+                <input type="text" name="note" class="form-control form-control-sm" placeholder="Note (required)" required>
+                <button class="btn btn-success btn-sm">Resolve</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-3">No alerts</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-2">
+  <strong>Accept</strong> releases quarantined stock in a storage unit back to Available.
+  <strong>Discard</strong> keeps it quarantined. Both are recorded with your name and time.
+</p>
+{% endblock %}

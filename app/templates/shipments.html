@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Shipments - Cold Chain Tracker{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Shipments</h3>
+  <a class="btn btn-primary btn-sm" href="/shipments/new">+ New shipment</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>From</th><th>To</th><th>Vehicle</th><th>Driver</th><th>Units</th>
+            <th>Dispatched</th><th>Status</th><th>Temperature</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.shipment_id }}</td>
+          <td>{{ r.source }}</td>
+          <td>{{ r.destination }}</td>
+          <td>{{ r.vehicle_reg_no }}</td>
+          <td>{{ r.driver_name }}</td>
+          <td>{{ r.units }}</td>
+          <td>{{ r.dispatch_time if r.dispatch_time else '' }}</td>
+          <td>
+            <span class="badge {% if r.status == 'Delivered' %}bg-success{% elif r.status == 'In Transit' %}bg-primary{% elif r.status == 'Cancelled' %}bg-dark{% else %}bg-secondary{% endif %}">{{ r.status }}</span>
+          </td>
+          <td>
+            <span class="badge {% if r.temp_status == 'Breached' %}bg-danger{% else %}bg-success{% endif %}">{{ r.temp_status }}</span>
+          </td>
+          <td class="text-end"><a class="btn btn-outline-secondary btn-sm" href="/shipments/{{ r.shipment_id }}">View</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" class="text-center text-muted py-3">No shipments</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
