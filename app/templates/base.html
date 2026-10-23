@@ -22,7 +22,7 @@
         {% endif %}
         {% if user.role in ['Admin', 'Quality Auditor'] %}
         <li class="nav-item"><a class="nav-link" href="/alerts">Alerts</a></li>
-        <li class="nav-item"><a class="nav-link disabled">Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="/reports">Reports</a></li>
         {% endif %}
       </ul>
       <span class="navbar-text me-3">{{ user.full_name }} <span class="badge bg-light text-primary">{{ user.role }}</span></span>

@@ -120,3 +120,7 @@ from app.alerts import router as alerts_router  # noqa: E402
 
 app.include_router(shipments_router)
 app.include_router(alerts_router)
+
+from app.reports import router as reports_router  # noqa: E402
+
+app.include_router(reports_router)

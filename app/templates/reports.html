@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Reports - Cold Chain Tracker{% endblock %}
+{% block content %}
+<h3 class="mb-3">Reports</h3>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Stock by facility (total vs usable)</div>
+      <div class="card-body"><div style="position: relative; height: 300px;"><canvas id="stockChart"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Temperature compliance by storage unit (%)</div>
+      <div class="card-body"><div style="position: relative; height: 300px;"><canvas id="complianceChart"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header">Alerts by severity</div>
+      <div class="card-body"><div style="position: relative; height: 280px;"><canvas id="severityChart"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Temperature, last 24 hours</span>
+        <select id="unitSelect" class="form-select form-select-sm" style="width: 260px;">
+          {% for u in units %}<option value="{{ u.unit_id }}">{{ u.label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="card-body"><div style="position: relative; height: 280px;"><canvas id="tempChart"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header">Batches expiring within 60 days, or already expired</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Facility</th><th>Product</th><th>Batch</th><th>Expires</th><th>Days left</th><th>Qty</th></tr></thead>
+          <tbody>
+            {% for e in expiring %}
+            <tr>
+              <td>{{ e.facility_name }}</td><td>{{ e.product_name }}</td><td>{{ e.batch_no }}</td>
+              <td>{{ e.expiry_date }}</td>
+              <td><span class="badge {% if e.days_left < 0 %}bg-danger{% elif e.days_left <= 30 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ e.days_left }}</span></td>
+              <td>{{ e.quantity }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-3">Nothing expiring soon</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header">Facilities ranked by value of unusable stock</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>Rank</th><th>Facility</th><th>Value</th></tr></thead>
+          <tbody>
+            {% for u in unusable %}
+            <tr><td>{{ u.value_rank }}</td><td>{{ u.facility_name }}</td><td>{{ u.unusable_value }}</td></tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted py-3">No unusable stock</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer text-muted small">Quarantined, expired, or non-active stock, ranked with SQL RANK().</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+const stock = {{ stock|tojson }};
+const compliance = {{ compliance|tojson }};
+const severity = {{ severity|tojson }};
+
+new Chart(document.getElementById('stockChart'), {
+  type: 'bar',
+  data: {
+    labels: stock.map(r => r.facility_name),
+    datasets: [
+      { label: 'Total', data: stock.map(r => r.total_qty), backgroundColor: '#6c8ebf' },
+      { label: 'Usable', data: stock.map(r => r.usable_qty), backgroundColor: '#5cb85c' }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false }
+});
+
+new Chart(document.getElementById('complianceChart'), {
+  type: 'bar',
+  data: {
+    labels: compliance.map(r => r.unit_label),
+    datasets: [{ label: 'In range (%)', data: compliance.map(r => r.compliance_pct),
+                 backgroundColor: compliance.map(r => r.compliance_pct < 100 ? '#d9534f' : '#5cb85c') }]
+  },
+  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+             scales: { x: { min: 90, max: 100 } } }
+});
+
+new Chart(document.getElementById('severityChart'), {
+  type: 'doughnut',
+  data: {
+    labels: severity.map(r => r.severity),
+    datasets: [{ data: severity.map(r => r.alerts),
+                 backgroundColor: ['#d9534f', '#f0ad4e', '#5bc0de', '#999999'] }]
+  },
+  options: { responsive: true, maintainAspectRatio: false }
+});
+
+let tempChart = null;
+async function loadTemp(id) {
+  const res = await fetch('/reports/api/temperature/' + id);
+  if (!res.ok) return;
+  const d = await res.json();
+  if (tempChart) tempChart.destroy();
+  tempChart = new Chart(document.getElementById('tempChart'), {
+    type: 'line',
+    data: {
+      labels: d.labels,
+      datasets: [
+        { label: 'Temperature (C)', data: d.temps, borderColor: '#0d6efd', pointRadius: 0, tension: 0.2 },
+        { label: 'Safe minimum', data: d.labels.map(() => d.min), borderColor: '#5cb85c', borderDash: [6, 4], pointRadius: 0 },
+        { label: 'Safe maximum', data: d.labels.map(() => d.max), borderColor: '#d9534f', borderDash: [6, 4], pointRadius: 0 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { maxTicksLimit: 8 } } } }
+  });
+}
+const sel = document.getElementById('unitSelect');
+sel.addEventListener('change', () => loadTemp(sel.value));
+if (sel.value) loadTemp(sel.value);
+</script>
+{% endblock %}
